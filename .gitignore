@@ -1,0 +1,14 @@
+# Ignora el entorno virtual
+env/
+__pycache__/
+*.pyc
+
+# Ignora archivos temporales del sistema
+.DS_Store
+Thumbs.db
+
+# Ignora configuración del editor
+.idea/
+.vscode/
+
+# Permitir que se agreguen todos los demás archivos
