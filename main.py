@@ -39,7 +39,13 @@ VIDEOS_DICT = {
 
 #Model Configurations
 MODEL_DIR = ROOT/'weights'
-DETECTION_MODEL = MODEL_DIR/'modelo_guardado.pt'
+
+import torch
+import ultralytics.nn.tasks
+torch.serialization.add_safe_globals([ultralytics.nn.tasks.DetectionModel])
+
+DETECTION_MODEL = YOLO("MODEL_DIR/'modelo_guardado.pt'")
+#DETECTION_MODEL = MODEL_DIR/'modelo_guardado.pt'
 #weights/modelo_guardado.pt
 #In case of your custom model
 #DETECTION_MODEL = MODEL_DIR/'custom_model_weight.pt'
