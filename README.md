@@ -1,1 +1,1 @@
-# YOLO11_Streamlit
+# Aplicacion_Clasificación_Imagenes_De_Cancer_De_mama_Streamlit
