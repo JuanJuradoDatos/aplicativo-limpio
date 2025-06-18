@@ -40,7 +40,7 @@ VIDEOS_DICT = {
 #Model Configurations
 MODEL_DIR = ROOT/'weights'
 DETECTION_MODEL = MODEL_DIR/'modelo_guardado.pt'
-
+#weights/modelo_guardado.pt
 #In case of your custom model
 #DETECTION_MODEL = MODEL_DIR/'custom_model_weight.pt'
 
