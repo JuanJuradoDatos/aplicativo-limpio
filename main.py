@@ -45,12 +45,12 @@ MODEL_DIR = ROOT/'weights'
 #torch.serialization.add_safe_globals([ultralytics.nn.tasks.DetectionModel])
 
 #DETECTION_MODEL = aplicativo-limpio/weights/'modelo_guardado.pt'
-#DETECTION_MODEL = MODEL_DIR/'modelo_guardado.pt'
+DETECTION_MODEL = MODEL_DIR/'modelo_guardado.pt'
 
-import torch
-from ultralytics.nn.tasks import DetectionModel
+#import torch
+#from ultralytics.nn.tasks import DetectionModel
 
-DETECTION_MODEL =torch.load(MODEL_DIR/'modelo_guardado.pt', map_location='cpu', weights_only=True)
+#DETECTION_MODEL =torch.load(MODEL_DIR/'modelo_guardado.pt', map_location='cpu', weights_only=True)
 
 #weights/modelo_guardado.pt
 #In case of your custom model
