@@ -10,8 +10,16 @@ from ultralytics.models.yolo.detect.predict import DetectionPredictor
 from ultralytics.utils import DEFAULT_CFG
 from types import SimpleNamespace
 
-# Registrar DetectionModel como clase segura para torch.load
-torch.serialization.add_safe_globals({'ultralytics.nn.tasks.DetectionModel': DetectionModel})
+# Registrar DetectionModel y C3k2 como clases seguras para torch.load
+try:
+    from ultralytics.nn.modules.block import C3k2
+    torch.serialization.add_safe_globals({
+        'ultralytics.nn.modules.block.C3k2': C3k2,
+        'ultralytics.nn.tasks.DetectionModel': DetectionModel
+    })
+except ImportError:
+    torch.serialization.add_safe_globals({'ultralytics.nn.tasks.DetectionModel': DetectionModel})
+    st.warning("⚠️ La clase C3k2 no está disponible en esta versión de Ultralytics. Considera instalar una versión anterior si ocurre un error al cargar el modelo.")
 
 # Get the absolute path of the current file
 FILE = Path(__file__).resolve()
