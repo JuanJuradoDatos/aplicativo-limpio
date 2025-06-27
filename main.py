@@ -10,15 +10,8 @@ from ultralytics.models.yolo.detect.predict import DetectionPredictor
 from ultralytics.utils import DEFAULT_CFG
 from types import SimpleNamespace
 
-# Registrar DetectionModel y C3k2 como clases seguras para torch.load
-try:
-    from ultralytics.nn.modules.block import C3k2
-    torch.serialization.add_safe_globals({
-        'ultralytics.nn.modules.block.C3k2': C3k2,
-        'ultralytics.nn.tasks.DetectionModel': DetectionModel
-    })
-except ImportError:
-    torch.serialization.add_safe_globals({'ultralytics.nn.tasks.DetectionModel': DetectionModel})
+# Registrar DetectionModel como clase segura para torch.load
+torch.serialization.add_safe_globals({'ultralytics.nn.tasks.DetectionModel': DetectionModel})
 
 # Get the absolute path of the current file
 FILE = Path(__file__).resolve()
@@ -71,8 +64,10 @@ model = None
 if model_type == 'Detection':
     model_path = Path(DETECTION_MODEL)
     try:
-        model_torch = torch.load(model_path, map_location="cpu", weights_only=False)
-        model_torch.eval()
+        # Definir contexto seguro sin requerir C3k2
+        with torch.serialization.safe_globals({'ultralytics.nn.tasks.DetectionModel': DetectionModel}):
+            model_torch = torch.load(model_path, map_location="cpu", weights_only=False)
+            model_torch.eval()
 
         class CustomYOLOWrapper:
             def __init__(self, model):
