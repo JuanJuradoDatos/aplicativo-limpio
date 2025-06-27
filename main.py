@@ -19,7 +19,6 @@ try:
     })
 except ImportError:
     torch.serialization.add_safe_globals({'ultralytics.nn.tasks.DetectionModel': DetectionModel})
-    st.warning("⚠️ La clase C3k2 no está disponible en esta versión de Ultralytics. Considera instalar una versión anterior si ocurre un error al cargar el modelo.")
 
 # Get the absolute path of the current file
 FILE = Path(__file__).resolve()
@@ -52,7 +51,10 @@ SEGMENTATION_MODEL = MODEL_DIR / 'yolo11n-seg.pt'
 POSE_ESTIMATION_MODEL = MODEL_DIR / 'yolo11n-pose.pt'
 
 # Page Layout
-st.set_page_config(page_title="YOLO11", page_icon="𝜄(𝜻)")
+try:
+    st.set_page_config(page_title="YOLO11", page_icon="🧠")
+except Exception:
+    st.set_page_config(page_title="YOLO11")
 
 # Header
 st.header("Detección de Cáncer de Mama")
@@ -84,8 +86,8 @@ if model_type == 'Detection':
         model = CustomYOLOWrapper(model_torch)
 
     except Exception as e:
-        st.error(f"Unable to load model. Check the specified path: {model_path}")
-        st.error(e)
+        st.error(f"❌ Unable to load model. Check the specified path: {model_path}")
+        st.error(f"💥 Error: {str(e)}")
 
 elif model_type == 'Segmentation':
     model_path = Path(SEGMENTATION_MODEL)
