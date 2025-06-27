@@ -6,7 +6,6 @@ import sys
 from PIL import Image
 import torch
 from ultralytics.nn.tasks import DetectionModel
-from ultralytics.models.yolo.detect.predict import DetectionPredictor
 from ultralytics.utils import DEFAULT_CFG
 from types import SimpleNamespace
 
@@ -71,20 +70,8 @@ model = None
 if model_type == 'Detection':
     model_path = Path(DETECTION_MODEL)
     try:
-        model_torch = torch.load(model_path, map_location="cpu", weights_only=False)
-        model_torch.eval()
-
-        class CustomYOLOWrapper:
-            def __init__(self, model):
-                self.predictor = DetectionPredictor(overrides={"conf": confidence_value})
-                self.predictor.args = SimpleNamespace(**DEFAULT_CFG)
-                self.predictor.model = model
-            def predict(self, source, conf=0.4):
-                self.predictor.args.conf = conf
-                return self.predictor.predict(source)
-
-        model = CustomYOLOWrapper(model_torch)
-
+        model = torch.load(model_path, map_location="cpu", weights_only=False)
+        model.eval()
     except Exception as e:
         model = None
         st.error(f"❌ Unable to load model. Check the specified path: {model_path}")
@@ -123,13 +110,12 @@ if source_radio == IMAGE:
                 st.image(str(DEFAULT_DETECT_IMAGE), caption="Detected Image", use_column_width=True)
             else:
                 if model is not None and st.sidebar.button("Detect Objects"):
-                    result = model.predict(uploaded_image, conf=confidence_value)
-                    boxes = result[0].boxes
-                    result_plotted = result[0].plot()[:, :, ::-1]
+                    result = model(uploaded_image)[0]
+                    result_plotted = result.plot()[:, :, ::-1]
                     st.image(result_plotted, caption="Detected Image", use_column_width=True)
                     try:
                         with st.expander("Detection Results"):
-                            for box in boxes:
+                            for box in result.boxes:
                                 st.write(box.data)
                     except Exception as e:
                         st.error(e)
@@ -153,8 +139,8 @@ elif source_radio == VIDEO:
                     success, image = video_cap.read()
                     if success:
                         image = cv2.resize(image, (720, int(720 * (9/16))))
-                        result = model.predict(image, conf=confidence_value)
-                        result_plotted = result[0].plot()
+                        result = model(image)[0]
+                        result_plotted = result.plot()
                         st_frame.image(result_plotted, caption="Detected Video", channels="BGR", use_column_width=True)
                     else:
                         video_cap.release()
