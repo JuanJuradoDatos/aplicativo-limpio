@@ -10,8 +10,15 @@ from ultralytics.models.yolo.detect.predict import DetectionPredictor
 from ultralytics.utils import DEFAULT_CFG
 from types import SimpleNamespace
 
-# Registrar DetectionModel como clase segura para torch.load
-torch.serialization.add_safe_globals({'ultralytics.nn.tasks.DetectionModel': DetectionModel})
+# Intentar registrar C3k2 si está disponible (versión antigua de Ultralytics)
+try:
+    from ultralytics.nn.modules.block import C3k2
+    torch.serialization.add_safe_globals({
+        'ultralytics.nn.modules.block.C3k2': C3k2,
+        'ultralytics.nn.tasks.DetectionModel': DetectionModel
+    })
+except ImportError:
+    torch.serialization.add_safe_globals({'ultralytics.nn.tasks.DetectionModel': DetectionModel})
 
 # Get the absolute path of the current file
 FILE = Path(__file__).resolve()
@@ -64,10 +71,8 @@ model = None
 if model_type == 'Detection':
     model_path = Path(DETECTION_MODEL)
     try:
-        # Definir contexto seguro sin requerir C3k2
-        with torch.serialization.safe_globals({'ultralytics.nn.tasks.DetectionModel': DetectionModel}):
-            model_torch = torch.load(model_path, map_location="cpu", weights_only=False)
-            model_torch.eval()
+        model_torch = torch.load(model_path, map_location="cpu", weights_only=False)
+        model_torch.eval()
 
         class CustomYOLOWrapper:
             def __init__(self, model):
@@ -81,6 +86,7 @@ if model_type == 'Detection':
         model = CustomYOLOWrapper(model_torch)
 
     except Exception as e:
+        model = None
         st.error(f"❌ Unable to load model. Check the specified path: {model_path}")
         st.error(f"💥 Error: {str(e)}")
 
@@ -116,7 +122,7 @@ if source_radio == IMAGE:
             if source_image is None:
                 st.image(str(DEFAULT_DETECT_IMAGE), caption="Detected Image", use_column_width=True)
             else:
-                if st.sidebar.button("Detect Objects"):
+                if model is not None and st.sidebar.button("Detect Objects"):
                     result = model.predict(uploaded_image, conf=confidence_value)
                     boxes = result[0].boxes
                     result_plotted = result[0].plot()[:, :, ::-1]
@@ -127,6 +133,8 @@ if source_radio == IMAGE:
                                 st.write(box.data)
                     except Exception as e:
                         st.error(e)
+                elif model is None:
+                    st.warning("⚠️ El modelo no se pudo cargar. No se puede realizar la predicción.")
         except Exception as e:
             st.error("Error Occurred While Processing the Image")
             st.error(e)
@@ -137,7 +145,7 @@ elif source_radio == VIDEO:
         video_bytes = video_file.read()
         if video_bytes:
             st.video(video_bytes)
-        if st.sidebar.button("Detect Video Objects"):
+        if model is not None and st.sidebar.button("Detect Video Objects"):
             try:
                 video_cap = cv2.VideoCapture(str(VIDEOS_DICT.get(source_video)))
                 st_frame = st.empty()
@@ -153,3 +161,5 @@ elif source_radio == VIDEO:
                         break
             except Exception as e:
                 st.sidebar.error("Error Loading Video: " + str(e))
+        elif model is None:
+            st.sidebar.warning("⚠️ El modelo no se pudo cargar. No se puede procesar el video.")
