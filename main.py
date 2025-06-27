@@ -67,9 +67,7 @@ st.set_page_config(
 )
 
 #Header
-st.header("
-Breast cancer detection app
-author Juan David Jurado Tapias")
+st.header("Breast cancer detection app author Juan David Jurado Tapias")
 
 #SideBar
 st.sidebar.header("Model Configurations")
