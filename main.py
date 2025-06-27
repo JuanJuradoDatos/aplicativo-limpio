@@ -6,7 +6,6 @@ import sys
 from PIL import Image
 import torch
 from ultralytics.nn.tasks import DetectionModel
-from ultralytics.utils import DEFAULT_CFG
 from types import SimpleNamespace
 
 # Intentar registrar C3k2 si está disponible (versión antigua de Ultralytics)
