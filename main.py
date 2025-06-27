@@ -67,7 +67,9 @@ st.set_page_config(
 )
 
 #Header
-st.header("Detección de Cancer de mama")
+st.header("
+Breast cancer detection app
+author Juan David Jurado Tapias")
 
 #SideBar
 st.sidebar.header("Model Configurations")
