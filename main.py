@@ -5,18 +5,19 @@ from pathlib import Path
 import sys
 from PIL import Image
 import torch
-from ultralytics.nn.tasks import DetectionModel
-from types import SimpleNamespace
 
 # Intentar registrar C3k2 si está disponible (versión antigua de Ultralytics)
 try:
+    from ultralytics.nn.tasks import DetectionModel
     from ultralytics.nn.modules.block import C3k2
+    torch._utils._rebuild_tensor_v2  # for older torch compatibility
+    torch.serialization.register_package("ultralytics")
     torch.serialization.add_safe_globals({
         'ultralytics.nn.modules.block.C3k2': C3k2,
         'ultralytics.nn.tasks.DetectionModel': DetectionModel
     })
-except ImportError:
-    torch.serialization.add_safe_globals({'ultralytics.nn.tasks.DetectionModel': DetectionModel})
+except Exception:
+    pass
 
 # Get the absolute path of the current file
 FILE = Path(__file__).resolve()
@@ -69,7 +70,7 @@ model = None
 if model_type == 'Detection':
     model_path = Path(DETECTION_MODEL)
     try:
-        model = torch.load(model_path, map_location="cpu", weights_only=False)
+        model = torch.load(model_path, map_location="cpu")
         model.eval()
     except Exception as e:
         model = None
